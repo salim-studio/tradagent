@@ -31,14 +31,21 @@ small{color:#93a4c4}.foot{text-align:center}</style></head><body>
 <div class=card><h3>📊 Signals</h3><div id=sigs><small>No signals yet — press the button.</small></div></div>
 <div class="card foot"><small>tradagent v1.0 — Binance + CoinGecko + hybrid AI engine | cache refreshes every 5 min<br>© 2026 salim-slimani. All rights reserved.</small></div>
 <script>
+function fail(msg){st.textContent='❌ '+msg;go.disabled=false;}
 async function run(){go.disabled=true;st.textContent='⏳ Analyzing...';
- let r=await fetch('/api/run',{method:'POST'});let j=await r.json();
+ let r=await fetch('/api/run',{method:'POST'});
+ if(!r.ok){let t='';try{t=(await r.json()).traceback||'';}catch(_){}fail('server error '+r.status+(t?' — open /api/debug and share the output':''));if(t)console.error(t);return;}
+ let j=await r.json();
+ if(j.error){fail(j.error+' — open /api/debug and share the output');if(j.traceback)console.error(j.traceback);return;}
  if(j.signals&&j.signals.length){render(j.signals);pb.style.width='100%';st.textContent=(j.summary||'Done')+' ('+(j.duration_s||'?')+'s)';go.disabled=false;}
  else poll(j.job_id);}
-async function poll(id){let r=await fetch('/api/job?id='+id);let j=await r.json();
+async function poll(id){let r=await fetch('/api/job?id='+id);
+ if(!r.ok){fail('server error '+r.status);return;}
+ let j=await r.json();
+ if(j.error){fail(j.error);return;}
  pb.style.width=j.progress+'%';st.textContent=j.step_message+' ('+j.progress+'%)';
  if(j.status!=='completed'){setTimeout(()=>poll(id),600);}else{load();go.disabled=false;}}
-async function load(){let r=await fetch('/api/signals');render(await r.json());}
+async function load(){try{let r=await fetch('/api/signals');if(r.ok)render(await r.json());}catch(_){}}
 function render(s){
  sigs.innerHTML=s.map(x=>`<div class=sig><span><b>${x.symbol}</b> <small>${x.engine} | ${x.reasoning||''}</small></span><span class=${x.signal}>${x.signal} ${x.confidence}%</span></div>`).join('')||'<small>No results</small>';}
 load();</script></body></html>"""
