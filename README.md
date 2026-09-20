@@ -6,6 +6,7 @@
   <img src="https://img.shields.io/badge/python-3.10%2B-blue?logo=python&logoColor=white" alt="Python 3.10+">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License">
   <img src="https://img.shields.io/badge/status-active-brightgreen" alt="Active">
+  <a href="https://vercel.com/new/clone?repository-url=https://github.com/salim-studio/tradagent"><img src="https://vercel.com/button" alt="Deploy with Vercel"></a>
 </p>
 
 # tradagent 🤖📈
@@ -76,6 +77,10 @@ tradagent/
 ├── cli.py / run.py    # command-line entry points
 └── requirements.txt   # minimal dependencies
 ```
+
+## ☁️ Deploy to Vercel
+
+One click (or `vercel --prod`). Zero config needed — `api/index.py` is the serverless entrypoint and `vercel.json` wires `/`, `/api/signals`, `/api/job`, `/api/run`. On Vercel the SQLite DB lives in `/tmp` (ephemeral, per-region) and analysis runs synchronously inside the request (~2–8s). Add optional env vars (`GOOGLE_GEMINI_API_KEY`, `LUNARCRUSH_API_KEY`, `DISCORD_WEBHOOK_URL`) in the Vercel dashboard.
 
 ## ⚠️ Disclaimer
 

@@ -18,7 +18,9 @@ def _symbols() -> list[str]:
 class Settings:
     symbols: list[str] = field(default_factory=_symbols)
     currency: str = os.getenv("TRADAGENT_CURRENCY", "usd").lower()
-    db_path: str = os.getenv("TRADAGENT_DB_PATH", "data/tradagent.db")
+    # Vercel serverless filesystem is read-only except /tmp
+    db_path: str = os.getenv("TRADAGENT_DB_PATH",
+                             "/tmp/tradagent.db" if os.getenv("VERCEL") else "data/tradagent.db")
     cache_ttl: int = int(os.getenv("TRADAGENT_CACHE_TTL", "300"))
     gemini_key: str = os.getenv("GOOGLE_GEMINI_API_KEY", "")
     lunarcrush_key: str = os.getenv("LUNARCRUSH_API_KEY", "")

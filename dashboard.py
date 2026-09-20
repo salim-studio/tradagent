@@ -33,11 +33,13 @@ small{color:#93a4c4}.foot{text-align:center}</style></head><body>
 <script>
 async function run(){go.disabled=true;st.textContent='⏳ Analyzing...';
  let r=await fetch('/api/run',{method:'POST'});let j=await r.json();
- poll(j.job_id);}
+ if(j.signals&&j.signals.length){render(j.signals);pb.style.width='100%';st.textContent=(j.summary||'Done')+' ('+(j.duration_s||'?')+'s)';go.disabled=false;}
+ else poll(j.job_id);}
 async function poll(id){let r=await fetch('/api/job?id='+id);let j=await r.json();
  pb.style.width=j.progress+'%';st.textContent=j.step_message+' ('+j.progress+'%)';
  if(j.status!=='completed'){setTimeout(()=>poll(id),600);}else{load();go.disabled=false;}}
-async function load(){let r=await fetch('/api/signals');let s=await r.json();
+async function load(){let r=await fetch('/api/signals');render(await r.json());}
+function render(s){
  sigs.innerHTML=s.map(x=>`<div class=sig><span><b>${x.symbol}</b> <small>${x.engine} | ${x.reasoning||''}</small></span><span class=${x.signal}>${x.signal} ${x.confidence}%</span></div>`).join('')||'<small>No results</small>';}
 load();</script></body></html>"""
 
