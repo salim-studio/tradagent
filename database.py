@@ -66,8 +66,16 @@ class Store:
         self.db.commit()
 
     def latest_signals(self, limit=50) -> list[dict]:
-        cur = self.db.execute("SELECT symbol,signal,confidence,reasoning,engine,created_at FROM trading_signals ORDER BY created_at DESC LIMIT ?", (limit,))
-        return [dict(zip(("symbol", "signal", "confidence", "reasoning", "engine", "created_at"), r)) for r in cur.fetchall()]
+        cur = self.db.execute("SELECT symbol,signal,confidence,reasoning,engine,metrics,created_at FROM trading_signals ORDER BY created_at DESC LIMIT ?", (limit,))
+        out = []
+        for sym, sig, conf, rea, eng, met, ts in cur.fetchall():
+            try:
+                met = json.loads(met) if met else {}
+            except Exception:
+                met = {}
+            out.append({"symbol": sym, "signal": sig, "confidence": conf,
+                        "reasoning": rea, "engine": eng, "metrics": met, "created_at": ts})
+        return out
 
     def job(self, jid) -> dict | None:
         cur = self.db.execute("SELECT * FROM analysis_jobs WHERE id=?", (jid,))
