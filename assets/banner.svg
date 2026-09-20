@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 380" role="img" aria-label="tradagent banner">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1220"/>
+      <stop offset="1" stop-color="#12264d"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="380" fill="url(#bg)"/>
+  <g opacity="0.12" stroke="#38bdf8" stroke-width="2">
+    <line x1="0" y1="95" x2="1200" y2="95"/>
+    <line x1="0" y1="190" x2="1200" y2="190"/>
+    <line x1="0" y1="285" x2="1200" y2="285"/>
+    <line x1="300" y1="0" x2="300" y2="380"/>
+    <line x1="600" y1="0" x2="600" y2="380"/>
+    <line x1="900" y1="0" x2="900" y2="380"/>
+  </g>
+  <!-- logo mark -->
+  <g transform="translate(90,62)">
+    <rect x="0" y="0" width="256" height="256" rx="56" fill="#0b1220" stroke="#22c55e" stroke-width="8"/>
+    <g stroke-linecap="round">
+      <line x1="78" y1="148" x2="78" y2="198" stroke="#ef4444" stroke-width="6"/>
+      <rect x="64" y="158" width="28" height="30" rx="4" fill="#ef4444"/>
+      <line x1="128" y1="114" x2="128" y2="174" stroke="#22c55e" stroke-width="6"/>
+      <rect x="114" y="124" width="28" height="38" rx="4" fill="#22c55e"/>
+      <line x1="178" y1="82" x2="178" y2="142" stroke="#22c55e" stroke-width="6"/>
+      <rect x="164" y="92" width="28" height="36" rx="4" fill="#22c55e"/>
+    </g>
+    <polyline points="50,204 102,164 132,180 188,104" fill="none" stroke="#38bdf8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <polygon points="192,78 168,96 186,116" fill="#38bdf8"/>
+  </g>
+  <!-- wordmark -->
+  <text x="400" y="190" font-family="Arial,Helvetica,sans-serif" font-size="104" font-weight="bold" fill="#ffffff"><tspan fill="#22c55e">trad</tspan>agent</text>
+  <text x="404" y="248" font-family="Arial,Helvetica,sans-serif" font-size="32" letter-spacing="6" fill="#93a4c4">FAST LOCAL AI TRADING AGENT</text>
+  <rect x="404" y="272" width="180" height="8" rx="4" fill="#22c55e"/>
+</svg>

@@ -6,7 +6,7 @@ Calibrated to emit BUY/SELL/HOLD with 0-100 confidence — no API, <1ms.
 from config import settings
 
 PROMPT = """You are a crypto trading analyst. Given JSON market metrics, reply ONLY valid JSON:
-{{"signal":"BUY|SELL|HOLD","confidence":0-100,"reasoning":"one Arabic sentence"}}"""
+{{"signal":"BUY|SELL|HOLD","confidence":0-100,"reasoning":"one English sentence"}}"""
 
 
 def local_score(m: dict) -> tuple[str, int, str]:
@@ -33,15 +33,15 @@ def local_score(m: dict) -> tuple[str, int, str]:
 
     reasons = []
     reasons.append(f"RSI {rsi}")
-    reasons.append(f"زخم {mom}%")
-    reasons.append(f"تغير 24س {round(chg,1)}%")
+    reasons.append(f"momentum {mom}%")
+    reasons.append(f"24h change {round(chg,1)}%")
     if gal != 50: reasons.append(f"Galaxy {gal}")
-    if vol > 8: reasons.append("تذبذب عالٍ — حذر")
+    if vol > 8: reasons.append("high volatility — caution")
 
-    if score >= 18: return "BUY", min(55 + int(score), 95), "إشارة شراء: " + "، ".join(reasons)
-    if score <= -18: return "SELL", min(55 + int(-score), 95), "إشارة بيع: " + "، ".join(reasons)
+    if score >= 18: return "BUY", min(55 + int(score), 95), "Buy signal: " + ", ".join(reasons)
+    if score <= -18: return "SELL", min(55 + int(-score), 95), "Sell signal: " + ", ".join(reasons)
     conf = max(40, 55 - int(abs(score)))
-    return "HOLD", conf, "انتظار: " + "، ".join(reasons)
+    return "HOLD", conf, "Waiting: " + ", ".join(reasons)
 
 
 def gemini_signal(m: dict) -> tuple[str, int, str] | None:

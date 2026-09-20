@@ -1,42 +1,88 @@
-# 🤖 tradagent — وكيل التداول الذكي (سريع • عملي • متكامل)
+<p align="center">
+  <img src="assets/banner.svg" alt="tradagent banner" width="100%">
+</p>
 
-نسخة عملية محسّنة من فكرة [ai-trading-agent-gemini](https://github.com/danilobatson/ai-trading-agent-gemini):
-نفس خط الأنابيب (7 خطوات: تهيئة → عملات → جلب → تحليل AI → حفظ → ملخص → إتمام)، لكن:
+<p align="center">
+  <img src="https://img.shields.io/badge/python-3.10%2B-blue?logo=python&logoColor=white" alt="Python 3.10+">
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License">
+  <img src="https://img.shields.io/badge/status-active-brightgreen" alt="Active">
+</p>
 
-| الأصل | tradagent |
-|---|---|
-| Next.js + Inngest + Supabase (5 مفاتيح إجبارية، 30-45 ثانية) | Python + SQLite محلي (0 مفاتيح إجبارية، 3-8 ثوانٍ) |
-| يتوقف بدون LunarCrush/Gemini مدفوعة | يعمل فوراً بمحرك محلي + Binance/CoinGecko المجانية، ويدعم Gemini/LunarCrush عند توفرها |
-| realtime معقد | جلب متوازي + كاش + داشبورد مدمجة بدون اعتماديات |
+# tradagent 🤖📈
 
-## 🚀 التشغيل (دقيقتان)
+**tradagent** is a fast, local-first AI trading agent that turns live crypto market data into actionable **BUY / SELL / HOLD** signals — with confidence scores, reasoning, a live dashboard, and backtesting. It works **out of the box with zero API keys** and gets smarter when you add optional Gemini / LunarCrush / Discord credentials.
+
+## ✨ Features
+
+- ⚡ **7-step analysis pipeline** — init → symbols → fetch → AI analysis → save → summary → done, typically in **2–8 seconds** for 5 symbols
+- 🧠 **Hybrid AI engine** — Google Gemini 1.5 Flash when a key is configured, otherwise a calibrated local quant engine (RSI + momentum + social), always available offline in \<1ms
+- 📡 **Free live market data** — Binance public API + CoinGecko fallback, fetched in parallel with smart caching
+- 💾 **Local storage** — SQLite (WAL mode, indexed) with `trading_signals` and `analysis_jobs` tables
+- 📊 **Zero-dependency dashboard** — live Arabic/English-ready web UI served from the standard library, no frontend build step
+- 🔔 **Discord alerts** — automatic signal notifications via webhook (optional)
+- 🧪 **Built-in backtest** — sanity-check the strategy against historical klines before risking anything
+
+## 🚀 Quick Start (2 minutes)
 
 ```bash
 cd tradagent
 pip install -r requirements.txt
-cp .env.example .env   # اختياري — يعمل بدونها
-python run.py                          # تحليل فوري: BTC,ETH,SOL,BNB,XRP
-python cli.py run --symbols BTC,ETH    # عملات مخصصة
-python cli.py signals --limit 10       # عرض الإشارات المحفوظة
-python cli.py backtest --symbols BTC   # باك تست سريع
-python cli.py dashboard --port 8000    # لوحة عربية حية http://localhost:8000
+cp .env.example .env   # optional — runs without it
+
+python run.py                        # instant analysis: BTC,ETH,SOL,BNB,XRP
+python cli.py run --symbols BTC,ETH  # custom symbols
+python cli.py signals --limit 10     # show saved signals
+python cli.py backtest --symbols BTC # quick strategy backtest
+python cli.py dashboard --port 8000  # live dashboard → http://localhost:8000
 ```
 
-## 🧠 كيف يعمل
+## 🧠 How It Works
 
-1. **جلب متوازي** (`data_providers.py`): Binance klines + ticker لكل العملات معاً (ThreadPool) + كاش 5 دقائق + fallback CoinGecko.
-2. **مؤشرات**: RSI-14، زخم 48h، تذبذب، تغير 24h + (Galaxy/Sentiment إن وُجد LunarCrush).
-3. **AI هجين** (`ai_engine.py`): يستخدم **Gemini 1.5 Flash** إن وُجد `GOOGLE_GEMINI_API_KEY`، وإلا المحرك الكمي المحلي (<1ms، يعمل أوفلاين).
-4. **تخزين** (`database.py`): SQLite + WAL + فهارس — نفس جدولَي الأصل (`trading_signals`, `analysis_jobs`).
-5. **تنبيهات Discord** تلقائية إن وُجد webhook.
+| Step | Progress | What happens |
+|------|----------|--------------|
+| init | 14% | Analysis job created |
+| symbols | 28% | Symbol list prepared |
+| fetch | 42% | Parallel market fetch (Binance + CoinGecko) + cache |
+| analyze | 57% | Hybrid AI scoring (Gemini or local engine), in parallel |
+| save | 71% | Signals persisted to SQLite |
+| summary | 85% | BUY/SELL/HOLD tally |
+| done | 100% | Completed + optional Discord alert |
 
-## ⚡ لماذا أسرع؟
+**Signal inputs:** RSI-14, 48h momentum, 24h change, volatility, plus Galaxy Score / sentiment when LunarCrush is configured.
 
-- جلب متوازي (8 workers) بدل التسلسلي → ~5x أسرع.
-- لا Inngest/Supabase round-trips — كل شيء محلي.
-- كاش TTL يمنع إعادة الجلب.
-- محرك محلي فوري بدل انتظار Gemini لكل عملة (Gemini اختياري بالتوازي أيضاً).
+## ⚙️ Configuration
 
-## ⚠️ إخلاء مسؤولية
+All keys are **optional**. Copy `.env.example` to `.env` and fill in what you have:
 
-ليست نصيحة مالية. الإشارات تعليمية — جرّب `backtest` أولاً ولا تتداول بأموال حقيقية دون فهم المخاطر.
+| Variable | Purpose | Required |
+|----------|---------|----------|
+| `GOOGLE_GEMINI_API_KEY` | Gemini AI analysis (else local engine) | No |
+| `LUNARCRUSH_API_KEY` | Social sentiment metrics | No |
+| `DISCORD_WEBHOOK_URL` | Signal alerts | No |
+| `TRADAGENT_SYMBOLS` | Default symbols | No |
+| `TRADAGENT_CACHE_TTL` | Cache lifetime (seconds) | No |
+
+## 📁 Project Structure
+
+```
+tradagent/
+├── assets/            # logo.svg, banner.svg (brand identity)
+├── agent.py           # 7-step analysis pipeline
+├── ai_engine.py       # hybrid Gemini / local signal engine
+├── data_providers.py  # Binance + CoinGecko + LunarCrush clients
+├── database.py        # SQLite store
+├── dashboard.py       # live web dashboard (stdlib only)
+├── backtest.py        # historical strategy check
+├── cli.py / run.py    # command-line entry points
+└── requirements.txt   # minimal dependencies
+```
+
+## ⚠️ Disclaimer
+
+Educational software — **not financial advice**. Signals are experimental. Always run `backtest` first and never trade with money you cannot afford to lose.
+
+## 📄 License
+
+MIT License — see [LICENSE](LICENSE) for details.
+
+© 2026 salim-slimani. All rights reserved.

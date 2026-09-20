@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="tradagent logo">
+  <rect x="8" y="8" width="240" height="240" rx="52" fill="#0b1220"/>
+  <rect x="8" y="8" width="240" height="240" rx="52" fill="none" stroke="#22c55e" stroke-width="7"/>
+  <!-- candlesticks -->
+  <g stroke-linecap="round">
+    <line x1="78" y1="148" x2="78" y2="198" stroke="#ef4444" stroke-width="6"/>
+    <rect x="64" y="158" width="28" height="30" rx="4" fill="#ef4444"/>
+    <line x1="128" y1="114" x2="128" y2="174" stroke="#22c55e" stroke-width="6"/>
+    <rect x="114" y="124" width="28" height="38" rx="4" fill="#22c55e"/>
+    <line x1="178" y1="82" x2="178" y2="142" stroke="#22c55e" stroke-width="6"/>
+    <rect x="164" y="92" width="28" height="36" rx="4" fill="#22c55e"/>
+  </g>
+  <!-- trend arrow -->
+  <polyline points="50,204 102,164 132,180 188,104" fill="none" stroke="#38bdf8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="192,78 168,96 186,116" fill="#38bdf8"/>
+</svg>

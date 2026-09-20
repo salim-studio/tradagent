@@ -1,7 +1,7 @@
-"""tradagent pipeline — 7 steps mirroring the reference, but local + parallel + fast.
+"""tradagent pipeline — 7-step local analysis: fast + parallel.
 
 Steps: init → symbols → fetch → analyze → save → summary → done
-Typical runtime: 3-8s for 5 symbols (vs 30-45s in reference).
+Typical runtime: 2-8s for 5 symbols.
 """
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -12,13 +12,13 @@ from config import settings
 from database import Store
 
 STEPS = [
-    (14, "init", "تهيئة التحليل..."),
-    (28, "symbols", "تجهيز قائمة العملات..."),
-    (42, "fetch", "جلب بيانات السوق..."),
-    (57, "analyze", "توليد الإشارات بالذكاء الاصطناعي..."),
-    (71, "save", "حفظ في قاعدة البيانات..."),
-    (85, "summary", "توليد الملخص..."),
-    (100, "done", "اكتمل التحليل ✅"),
+    (14, "init", "Initializing analysis..."),
+    (28, "symbols", "Preparing symbol list..."),
+    (42, "fetch", "Fetching market data..."),
+    (57, "analyze", "Generating signals with AI..."),
+    (71, "save", "Saving to database..."),
+    (85, "summary", "Building summary..."),
+    (100, "done", "Analysis complete ✅"),
 ]
 
 
@@ -36,11 +36,11 @@ class Agent:
         symbols = [s.upper() for s in (symbols or settings.symbols)]
         t0 = time.time()
         jid = self.store.new_job()
-        self._emit(jid, 14, "init", f"تهيئة التحليل لـ {len(symbols)} عملة...")
-        self._emit(jid, 28, "symbols", f"العملات: {', '.join(symbols)}")
+        self._emit(jid, 14, "init", f"Initializing analysis for {len(symbols)} symbols...")
+        self._emit(jid, 28, "symbols", f"Symbols: {', '.join(symbols)}")
 
         # 3) parallel market fetch
-        self._emit(jid, 42, "fetch", "جلب بيانات السوق (Binance + CoinGecko)...")
+        self._emit(jid, 42, "fetch", "Fetching market data (Binance + CoinGecko)...")
         metrics = dp.fetch_all(symbols)
         # enrich with coingecko fallback prices where binance failed
         cg = dp.coingecko_markets(symbols)
@@ -51,23 +51,23 @@ class Agent:
 
         # 4) parallel AI analysis
         self._emit(jid, 57, "analyze",
-                   f"تحليل AI ({'Gemini' if settings.use_gemini else 'محرك محلي سريع'})...")
+                   f"AI analysis ({'Gemini' if settings.use_gemini else 'fast local engine'})...")
         with ThreadPoolExecutor(max_workers=8) as ex:
             signals = list(ex.map(ai_engine.analyze, metrics))
 
         # 5) save
-        self._emit(jid, 71, "save", "حفظ الإشارات...")
+        self._emit(jid, 71, "save", "Saving signals...")
         self.store.save_signals(signals)
         self.store.job_update(jid, signals=len(signals))
 
         # 6) summary
-        self._emit(jid, 85, "summary", "توليد الملخص...")
+        self._emit(jid, 85, "summary", "Building summary...")
         buys = sum(1 for s in signals if s["signal"] == "BUY")
         sells = sum(1 for s in signals if s["signal"] == "SELL")
-        summary = f"شراء: {buys} | بيع: {sells} | انتظار: {len(signals)-buys-sells}"
+        summary = f"BUY: {buys} | SELL: {sells} | HOLD: {len(signals)-buys-sells}"
 
         # 7) done + optional discord
-        self._emit(jid, 100, "done", f"اكتمل ✅ — {summary}")
+        self._emit(jid, 100, "done", f"Done ✅ — {summary}")
         self.store.job_finish(jid, len(signals), t0)
         self._notify(summary, signals)
         return {"job_id": jid, "signals": signals, "summary": summary,
