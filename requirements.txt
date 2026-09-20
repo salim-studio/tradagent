@@ -1,0 +1,5 @@
+# tradagent — minimal, fast, practical
+requests>=2.31
+python-dotenv>=1.0
+# Optional: only if you want Gemini AI (else local engine is used, zero cost, offline-capable)
+# google-generativeai>=0.8.0
