@@ -102,6 +102,24 @@ def coingecko_markets(symbols: list[str]) -> dict[str, dict]:
     return {}
 
 
+def coingecko_closes(symbol: str, days: int = 2) -> list[float]:
+    """Fallback price history when Binance is unreachable (e.g. US geo-block).
+
+    Free market_chart endpoint: hourly prices for days>1 — enough for RSI/momentum.
+    """
+    entry = SYMBOL_MAP.get(symbol.upper())
+    if not entry or not entry[1]:
+        return []
+    try:
+        r = SESSION.get(f"{COINGECKO}/coins/{entry[1]}/market_chart",
+                        params={"vs_currency": settings.currency, "days": days}, timeout=10)
+        if r.ok:
+            return [float(p[1]) for p in r.json().get("prices", [])]
+    except Exception:
+        pass
+    return []
+
+
 def lunarcrush_social(symbol: str) -> dict:
     """Only called when key exists; never blocks the pipeline."""
     if not settings.use_lunarcrush:
@@ -156,6 +174,9 @@ def fetch_one(symbol: str) -> dict:
     ticker = binance_ticker(symbol)
     klines = binance_klines(symbol)
     closes = [float(k[4]) for k in klines] if klines else []
+    if not closes:
+        # Binance unreachable (e.g. US geo-block) → CoinGecko history fallback
+        closes = coingecko_closes(symbol)
     social = lunarcrush_social(symbol)
 
     price = ticker.get("price", closes[-1] if closes else 0)
